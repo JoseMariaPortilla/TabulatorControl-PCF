@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-#  build-solution.sh  (v4 - con .eslintrc.json y compatibilidad .NET 6)
+#  build-solution.sh  (v5 - eslintrc sin plugin @microsoft/power-apps)
 #  Uso: bash build-solution.sh
 # =============================================================================
 set -e
@@ -12,7 +12,7 @@ PCF_DIR="$(pwd)"
 SOLUTION_DIR="/tmp/${SOLUTION_NAME}"
 
 echo ""
-echo "=== TabulatorControl PCF — Build & Package v4 ==="
+echo "=== TabulatorControl PCF — Build & Package v5 ==="
 echo ""
 
 # ── PASO 1: Verificar herramientas ───────────────────────────────────────────
@@ -20,16 +20,14 @@ echo "[1/8] Verificando herramientas..."
 node --version && echo "  OK: Node.js"
 npm --version  && echo "  OK: npm"
 dotnet --version && echo "  OK: .NET"
-
 export PATH="$PATH:$HOME/.dotnet/tools"
 
 if command -v pac &> /dev/null; then
   echo "  OK: pac disponible"
   PAC_OK=true
 else
-  echo "  WARN: pac no disponible - instala con:"
+  echo "  WARN: pac no encontrado. Instala con:"
   echo "    dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version 1.29.6"
-  echo "    export PATH=\"\$PATH:\$HOME/.dotnet/tools\""
   PAC_OK=false
 fi
 
@@ -43,11 +41,7 @@ echo "  OK"
 echo ""
 echo "[3/8] Creando ManifestTypes.d.ts..."
 mkdir -p TabulatorControl/generated
-
 cat > TabulatorControl/generated/ManifestTypes.d.ts << 'MANIFEST_EOF'
-/*
- * Generated — DO NOT EDIT manually
- */
 export interface IInputs {
   dataJson: ComponentFramework.PropertyTypes.StringProperty;
   configJson: ComponentFramework.PropertyTypes.StringProperty;
@@ -58,23 +52,28 @@ export interface IOutputs {
 MANIFEST_EOF
 echo "  OK: ManifestTypes.d.ts"
 
-# ── PASO 4: .eslintrc.json ───────────────────────────────────────────────────
+# ── PASO 4: .eslintrc.json (sin plugin @microsoft/power-apps) ────────────────
 echo ""
 echo "[4/8] Creando .eslintrc.json..."
-
 cat > TabulatorControl/.eslintrc.json << 'ESLINT_EOF'
 {
-  "env": { "browser": true, "es2021": true },
-  "extends": ["eslint:recommended", "plugin:@microsoft/power-apps/recommended"],
+  "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2021,
-    "sourceType": "module",
-    "project": "../tsconfig.json"
+    "sourceType": "module"
   },
-  "plugins": ["@microsoft/power-apps"],
-  "rules": { "no-unused-vars": "warn" },
-  "ignorePatterns": ["generated/"]
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "no-console": "off"
+  },
+  "ignorePatterns": ["generated/", "**/__tests__/"]
 }
 ESLINT_EOF
 echo "  OK: .eslintrc.json"
@@ -85,7 +84,7 @@ echo "[5/8] Compilando PCF (npm run build)..."
 npm run build
 echo "  OK: PCF compilado en out/"
 
-# ── PASOS 6-8: Solucion ZIP (solo si pac disponible) ─────────────────────────
+# ── PASOS 6-8: Solucion ZIP ──────────────────────────────────────────────────
 if [ "$PAC_OK" = true ]; then
 
   echo ""
@@ -125,7 +124,6 @@ if [ "$PAC_OK" = true ]; then
 else
   echo ""
   echo "==========================================================="
-  echo "  PCF compilado OK. pac no disponible para crear ZIP."
-  echo "  Instala pac y vuelve a ejecutar: bash build-solution.sh"
+  echo "  PCF compilado OK. Instala pac para crear el ZIP."
   echo "==========================================================="
 fi
