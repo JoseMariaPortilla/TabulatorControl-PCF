@@ -1,26 +1,22 @@
 {
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "plugin:@microsoft/power-apps/recommended"
-  ],
+  "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2021,
-    "sourceType": "module",
-    "project": "../tsconfig.json"
+    "sourceType": "module"
   },
-  "plugins": [
-    "@microsoft/power-apps"
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
-    "no-unused-vars": "warn",
-    "@typescript-eslint/no-unused-vars": "warn"
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "no-console": "off"
   },
   "ignorePatterns": [
-    "generated/"
+    "generated/",
+    "**/__tests__/"
   ]
 }
