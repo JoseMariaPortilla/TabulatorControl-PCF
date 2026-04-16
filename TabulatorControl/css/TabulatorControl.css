@@ -1,0 +1,225 @@
+/* ══════════════════════════════════════════════════════════
+   TabulatorControl PCF – Estilos base + tema Fluent UI
+   ══════════════════════════════════════════════════════════ */
+
+/* Contenedor raiz */
+.tabulator-pcf-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+/* Div target de Tabulator */
+.tabulator-pcf-table {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+/* ── Base Tabulator ── */
+.tabulator {
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+  background: #ffffff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+}
+
+/* ── Header ── */
+.tabulator .tabulator-header {
+  background: #f3f2f1;
+  border-bottom: 2px solid #0078d4;
+  font-weight: 600;
+  color: #323130;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+  border-right: 1px solid #d2d0ce;
+  background: transparent;
+}
+
+.tabulator .tabulator-header .tabulator-col:hover {
+  background: #edebe9;
+}
+
+.tabulator .tabulator-header .tabulator-col.tabulator-sortable .tabulator-col-title {
+  padding-right: 20px;
+}
+
+/* Icono de sort */
+.tabulator .tabulator-header .tabulator-col .tabulator-col-sorter {
+  color: #605e5c;
+}
+
+.tabulator .tabulator-header .tabulator-col.tabulator-col-sorted .tabulator-col-sorter {
+  color: #0078d4;
+}
+
+/* ── Filas ── */
+.tabulator .tabulator-row {
+  border-bottom: 1px solid #edebe9;
+  color: #323130;
+  transition: background 0.1s ease;
+}
+
+.tabulator .tabulator-row:nth-child(even) {
+  background: #faf9f8;
+}
+
+.tabulator .tabulator-row:hover {
+  background: #deecf9 !important;
+  cursor: pointer;
+}
+
+/* Fila seleccionada */
+.tabulator .tabulator-row.tabulator-selected,
+.tabulator .tabulator-row.tabulator-selected:hover {
+  background: #0078d4 !important;
+  color: #ffffff !important;
+}
+
+.tabulator .tabulator-row.tabulator-selected .tabulator-cell {
+  border-right-color: #106ebe;
+}
+
+/* ── Celdas ── */
+.tabulator .tabulator-row .tabulator-cell {
+  border-right: 1px solid #edebe9;
+  padding: 6px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Header Filters ── */
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter {
+  margin-top: 4px;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter input {
+  border: 1px solid #c8c6c4;
+  border-radius: 2px;
+  padding: 2px 6px;
+  font-size: 12px;
+  width: 100%;
+  background: #ffffff;
+  color: #323130;
+  font-family: inherit;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter input:focus {
+  border-color: #0078d4;
+  outline: none;
+  box-shadow: 0 0 0 1px #0078d4;
+}
+
+/* ── Paginacion ── */
+.tabulator .tabulator-footer {
+  background: #f3f2f1;
+  border-top: 1px solid #e1e1e1;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tabulator .tabulator-footer .tabulator-page-size {
+  border: 1px solid #c8c6c4;
+  border-radius: 2px;
+  padding: 3px 6px;
+  background: #ffffff;
+  color: #323130;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tabulator .tabulator-footer .tabulator-page {
+  border: 1px solid #c8c6c4;
+  border-radius: 2px;
+  background: #ffffff;
+  color: #323130;
+  padding: 3px 8px;
+  margin: 0 1px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.1s;
+}
+
+.tabulator .tabulator-footer .tabulator-page:hover {
+  background: #deecf9;
+  border-color: #0078d4;
+  color: #0078d4;
+}
+
+.tabulator .tabulator-footer .tabulator-page.active {
+  background: #0078d4;
+  border-color: #0078d4;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.tabulator .tabulator-footer .tabulator-page:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Barra de scroll */
+.tabulator .tabulator-tableHolder::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tabulator .tabulator-tableHolder::-webkit-scrollbar-track {
+  background: #f3f2f1;
+}
+
+.tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
+  background: #c8c6c4;
+  border-radius: 4px;
+}
+
+.tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb:hover {
+  background: #a19f9d;
+}
+
+/* ── Columnas movibles (drag handle) ── */
+.tabulator .tabulator-row .tabulator-row-handle {
+  cursor: move;
+  color: #a19f9d;
+}
+
+/* ── No data placeholder ── */
+.tabulator .tabulator-placeholder {
+  color: #a19f9d;
+  font-style: italic;
+  padding: 20px;
+  text-align: center;
+}
+
+/* ── Error state ── */
+.tabulator-pcf-error {
+  padding: 16px 20px;
+  color: #a4262c;
+  background: #fde7e9;
+  border: 1px solid #f1707b;
+  border-radius: 4px;
+  margin: 10px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Responsive collapse indicator ── */
+.tabulator .tabulator-row .tabulator-responsive-collapse-toggle {
+  color: #0078d4;
+  cursor: pointer;
+  font-size: 14px;
+}
