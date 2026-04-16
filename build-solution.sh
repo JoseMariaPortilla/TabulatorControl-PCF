@@ -1,7 +1,6 @@
 #!/bin/bash
 # =============================================================================
-#  build-solution.sh  (v3 - pac via APT repositorio oficial Microsoft)
-#  Compatible con .NET 6, 7, 8 en Linux/Codespaces
+#  build-solution.sh  (v4 - con .eslintrc.json y compatibilidad .NET 6)
 #  Uso: bash build-solution.sh
 # =============================================================================
 set -e
@@ -13,85 +12,36 @@ PCF_DIR="$(pwd)"
 SOLUTION_DIR="/tmp/${SOLUTION_NAME}"
 
 echo ""
-echo "=== TabulatorControl PCF — Build & Package v3 ==="
+echo "=== TabulatorControl PCF — Build & Package v4 ==="
 echo ""
 
-# ── PASO 1: Verificar herramientas basicas ────────────────────────────────────
-echo "[1/7] Verificando herramientas..."
+# ── PASO 1: Verificar herramientas ───────────────────────────────────────────
+echo "[1/8] Verificando herramientas..."
 node --version && echo "  OK: Node.js"
 npm --version  && echo "  OK: npm"
 dotnet --version && echo "  OK: .NET"
 
-# ── Instalar pac CLI via repositorio APT oficial de Microsoft ─────────────────
-if ! command -v pac &> /dev/null; then
-  echo "  Instalando pac CLI via repositorio APT de Microsoft..."
-
-  # Agregar repositorio Microsoft
-  curl -sL https://packages.microsoft.com/keys/microsoft.asc | \
-    gpg --dearmor | \
-    sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
-
-  # Detectar version de Ubuntu/Debian
-  . /etc/os-release
-  DISTRO="${ID}${VERSION_ID}"
-
-  # Agregar el repo de prod de Power Platform
-  echo "deb [arch=amd64] https://packages.microsoft.com/repos/ppa/prod/${ID}/${VERSION_ID} stable main" | \
-    sudo tee /etc/apt/sources.list.d/microsoft-prod.list > /dev/null
-
-  sudo apt-get update -qq
-  sudo apt-get install -y powerapps-cli 2>/dev/null || true
-
-  # Si APT falla, usar la version 1.x de dotnet tool (compatible con .NET 6)
-  if ! command -v pac &> /dev/null; then
-    echo "  APT no disponible, instalando via dotnet tool version 1.x..."
-    dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version 1.29.6 2>/dev/null || \
-    dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version 1.28.3 2>/dev/null || true
-    export PATH="$PATH:$HOME/.dotnet/tools"
-  fi
-
-  # Si aun no hay pac, usar el binario precompilado
-  if ! command -v pac &> /dev/null; then
-    echo "  Descargando pac binario precompilado..."
-    PAC_VERSION="1.29.6"
-    PAC_URL="https://api.nuget.org/v3-flatcontainer/microsoft.powerapps.cli/${PAC_VERSION}/microsoft.powerapps.cli.${PAC_VERSION}.nupkg"
-    mkdir -p /tmp/pac_install
-    curl -sL "${PAC_URL}" -o /tmp/pac_install/pac.nupkg
-    cd /tmp/pac_install
-    unzip -q pac.nupkg -d pac_extracted 2>/dev/null || true
-    # Buscar binario linux-x64
-    PAC_BIN=$(find pac_extracted -name "pac" -type f 2>/dev/null | head -1)
-    if [ -n "$PAC_BIN" ]; then
-      chmod +x "$PAC_BIN"
-      sudo cp "$PAC_BIN" /usr/local/bin/pac
-      echo "  OK: pac instalado desde NuGet"
-    fi
-    cd "${PCF_DIR}"
-  fi
-else
-  echo "  OK: pac ya disponible: $(pac --version | head -1)"
-fi
-
 export PATH="$PATH:$HOME/.dotnet/tools"
 
-# Verificar pac
 if command -v pac &> /dev/null; then
-  echo "  OK: pac $(pac --version | head -1)"
+  echo "  OK: pac disponible"
   PAC_OK=true
 else
-  echo "  WARN: pac no disponible - se omitira la creacion de solucion"
+  echo "  WARN: pac no disponible - instala con:"
+  echo "    dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version 1.29.6"
+  echo "    export PATH=\"\$PATH:\$HOME/.dotnet/tools\""
   PAC_OK=false
 fi
 
 # ── PASO 2: npm install ───────────────────────────────────────────────────────
 echo ""
-echo "[2/7] Instalando dependencias npm..."
+echo "[2/8] Instalando dependencias npm..."
 npm install
 echo "  OK"
 
 # ── PASO 3: ManifestTypes.d.ts ───────────────────────────────────────────────
 echo ""
-echo "[3/7] Creando ManifestTypes.d.ts..."
+echo "[3/8] Creando ManifestTypes.d.ts..."
 mkdir -p TabulatorControl/generated
 
 cat > TabulatorControl/generated/ManifestTypes.d.ts << 'MANIFEST_EOF'
@@ -106,20 +56,40 @@ export interface IOutputs {
   selectedRow?: string;
 }
 MANIFEST_EOF
+echo "  OK: ManifestTypes.d.ts"
 
-echo "  OK: ManifestTypes.d.ts creado"
-
-# ── PASO 4: Build PCF ─────────────────────────────────────────────────────────
+# ── PASO 4: .eslintrc.json ───────────────────────────────────────────────────
 echo ""
-echo "[4/7] Compilando PCF (npm run build)..."
-npm run build
-echo "  OK: PCF compilado"
+echo "[4/8] Creando .eslintrc.json..."
 
-# ── PASOS 5-7: Crear solucion (solo si pac disponible) ───────────────────────
+cat > TabulatorControl/.eslintrc.json << 'ESLINT_EOF'
+{
+  "env": { "browser": true, "es2021": true },
+  "extends": ["eslint:recommended", "plugin:@microsoft/power-apps/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "project": "../tsconfig.json"
+  },
+  "plugins": ["@microsoft/power-apps"],
+  "rules": { "no-unused-vars": "warn" },
+  "ignorePatterns": ["generated/"]
+}
+ESLINT_EOF
+echo "  OK: .eslintrc.json"
+
+# ── PASO 5: Build PCF ─────────────────────────────────────────────────────────
+echo ""
+echo "[5/8] Compilando PCF (npm run build)..."
+npm run build
+echo "  OK: PCF compilado en out/"
+
+# ── PASOS 6-8: Solucion ZIP (solo si pac disponible) ─────────────────────────
 if [ "$PAC_OK" = true ]; then
 
   echo ""
-  echo "[5/7] Inicializando solucion Power Apps..."
+  echo "[6/8] Inicializando solucion..."
   rm -rf "${SOLUTION_DIR}"
   mkdir -p "${SOLUTION_DIR}"
   cd "${SOLUTION_DIR}"
@@ -130,35 +100,32 @@ if [ "$PAC_OK" = true ]; then
   echo "  OK"
 
   echo ""
-  echo "[6/7] Agregando referencia al PCF..."
+  echo "[7/8] Agregando referencia al PCF..."
   pac solution add-reference --path "${PCF_DIR}"
   echo "  OK"
 
   echo ""
-  echo "[7/7] Compilando solucion (dotnet build)..."
+  echo "[8/8] dotnet build..."
   dotnet build --configuration Release
 
   ZIP_FOUND=$(find . -name "*.zip" -not -path "*/obj/*" | head -1)
   if [ -n "$ZIP_FOUND" ]; then
     cp "${ZIP_FOUND}" "${PCF_DIR}/${SOLUTION_NAME}.zip"
     echo ""
-    echo "============================================================="
-    echo "  ZIP listo: ${PCF_DIR}/${SOLUTION_NAME}.zip"
-    echo "  -> Explorer -> clic derecho en .zip -> Download"
-    echo "  -> make.powerapps.com -> Soluciones -> Importar solucion"
-    echo "============================================================="
+    echo "==========================================================="
+    echo "  ZIP: ${PCF_DIR}/${SOLUTION_NAME}.zip"
+    echo "  -> Explorer -> clic derecho -> Download"
+    echo "  -> make.powerapps.com -> Soluciones -> Importar"
+    echo "==========================================================="
   else
-    echo "ERROR: No se encontro el ZIP"
+    echo "ERROR: No se genero el ZIP"
     exit 1
   fi
 
 else
   echo ""
-  echo "============================================================="
-  echo "  PCF compilado OK en: ${PCF_DIR}/out/"
-  echo ""
-  echo "  pac no disponible. Para instalar pac manualmente:"
-  echo "  sudo apt-get install -y powerapps-cli"
-  echo "  O bien usa GitHub Actions (ver README)"
-  echo "============================================================="
+  echo "==========================================================="
+  echo "  PCF compilado OK. pac no disponible para crear ZIP."
+  echo "  Instala pac y vuelve a ejecutar: bash build-solution.sh"
+  echo "==========================================================="
 fi
