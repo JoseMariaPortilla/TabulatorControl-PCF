@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+  <control namespace="MineroSuite"
+           constructor="TabulatorControl"
+           version="1.0.0"
+           display-name-key="TabulatorControl"
+           description-key="TabulatorControl_Desc"
+           control-type="standard">
+
+    <!-- INPUT: JSON con los datos (array de objetos) -->
+    <property name="dataJson"
+              display-name-key="dataJson"
+              description-key="dataJson_Desc"
+              of-type="SingleLine.Text"
+              usage="input"
+              required="true" />
+
+    <!-- INPUT: JSON con configuracion de columnas y opciones de Tabulator -->
+    <property name="configJson"
+              display-name-key="configJson"
+              description-key="configJson_Desc"
+              of-type="SingleLine.Text"
+              usage="input"
+              required="false" />
+
+    <!-- OUTPUT: Fila seleccionada como JSON string -->
+    <property name="selectedRow"
+              display-name-key="selectedRow"
+              description-key="selectedRow_Desc"
+              of-type="SingleLine.Text"
+              usage="output"
+              required="false" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <css path="css/TabulatorControl.css" order="1" />
+    </resources>
+  </control>
+</manifest>
