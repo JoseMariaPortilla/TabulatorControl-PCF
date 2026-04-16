@@ -1,0 +1,6 @@
+# Ignora archivos innecesarios en el paquete PCF
+node_modules
+out
+*.map
+*.test.ts
+.DS_Store
